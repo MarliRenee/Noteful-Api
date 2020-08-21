@@ -8,7 +8,7 @@ describe('Folder Endpoints', function() {
   before('make knex instance', () => {
     db = knex({
       client: 'pg',
-      connection: process.env.TEST_DATABASE_URL,
+      connection: process.env.TEST_DB_URL,
     })
     app.set('db', db)
   })
@@ -65,7 +65,7 @@ describe('Folder Endpoints', function() {
           .set('Authorization', `Bearer ${process.env.API_TOKEN}`)
           .expect(200)
           .expect(res => {
-            expect(res.body[0].title).to.eql(expectedFolder.title)
+            expect(res.body[0].name).to.eql(expectedFolder.name)
           })
       })
     })
@@ -117,7 +117,7 @@ describe('Folder Endpoints', function() {
           .set('Authorization', `Bearer ${process.env.API_TOKEN}`)
           .expect(200)
           .expect(res => {
-            expect(res.body.title).to.eql(expectedFolder.title)
+            expect(res.body.name).to.eql(expectedFolder.name)
             expect(res.body.content).to.eql(expectedFolder.content)
           })
       })
@@ -129,7 +129,7 @@ describe('Folder Endpoints', function() {
 
     it('creates a folder, responding with 201 and the new folder', () => {
     const newFolder = {
-      title: 'Test New Folder'
+      name: 'Test New Folder'
     }
     return supertest(app)
       .post('/api/folders')
@@ -137,22 +137,23 @@ describe('Folder Endpoints', function() {
       .set('Authorization', `Bearer ${process.env.API_TOKEN}`)
       .expect(201)
       .expect(res => {
-        expect(res.body.title).to.eql(newFolder.title)
+        expect(res.body.name).to.eql(newFolder.name)
         expect(res.body).to.have.property('id')
         expect(res.headers.location).to.eql(`/api/folders/${res.body.id}`)
       })
       .then(res =>
         supertest(app)
           .get(`/api/folders/${res.body.id}`)
+          .set('Authorization', `Bearer ${process.env.API_TOKEN}`)
           .expect(res.body)
         )
     })
 
-    const requiredFields = ['title']
+    const requiredFields = ['name']
 
     requiredFields.forEach(field => {
       const newFolder = {
-        title: 'Test New Folder'
+        name: 'Test New Folder'
       }
 
       it(`responds with 400 and an error message whenthe '${field}' is missing`, () => {
@@ -176,7 +177,7 @@ describe('Folder Endpoints', function() {
         .set('Authorization', `Bearer ${process.env.API_TOKEN}`)
         .expect(201)
         .expect(res => {
-          expect(res.body.title).to.eql(expectedFolder.title);
+          expect(res.body.name).to.eql(expectedFolder.name);
         });
     });
   })
@@ -187,6 +188,7 @@ describe('Folder Endpoints', function() {
         const folder_id = 123456;
         return supertest(app)
           .delete(`/api/folders/${folder_id}`)
+          .set('Authorization', `Bearer ${process.env.API_TOKEN}`)
           .expect(404, { error: { message: `Folder Not Found` } })
       })
     })
@@ -241,7 +243,7 @@ describe('Folder Endpoints', function() {
   //     it('responds with 204 and updates the folder', () => {
   //       const idToUpdate = 2
   //       const updateFolder = {
-  //         title: 'updated folder title',
+  //         name: 'updated folder name',
   //       }
   //       const expectedFolder = {
   //         ...testFolders[idToUpdate - 1],
@@ -266,7 +268,7 @@ describe('Folder Endpoints', function() {
   //         .send({ irrelevantField: 'foo' })
   //         .expect(400, {
   //           error: {
-  //             message: `Request body must contain either, 'title'`
+  //             message: `Request body must contain either, 'name'`
   //           }
   //         })
   //     })
@@ -274,7 +276,7 @@ describe('Folder Endpoints', function() {
   //     it(`responds with 204 when updating only a subset of fields`, () => {
   //       const idToUpdate = 2
   //       const updateFolder = {
-  //         title: 'updated folder title',
+  //         name: 'updated folder name',
   //       }
   //       const expectedFolder = {
   //         ...testFolders[idToUpdate - 1],

@@ -1,109 +1,92 @@
-const express = require( 'express' )
-const path = require( 'path' )
-const FolderService = require( './folders-service' )
-const logger = require( '../logger' )
+const express = require('express')
+const xss = require('xss')
+const path = require('path')
+const FoldersService = require('./folders-service')
 
-const folderRouter = express.Router()
+const foldersRouter = express.Router()
 const jsonParser = express.json()
 
-// pull each piece of logic out of each route, all after .get, and put that all into a route file with a function for each route.
-folderRouter
+const sanitizeFolder = folder => ({
+    id: folder.id,
+    name: xss(folder.name)
+})
 
-    .route('api/folder')
+foldersRouter
+    .route('/')
 
-    .get(( req, res, next ) => {
-        const knexInstance = req.app.get('db')
-        FolderService.getAllFolders(knexInstance)
-        .then( (folders) => {
-            res.json(folders)
+    .get((req, res, next) => {
+        FoldersService.getAllFolders(
+            req.app.get('db')
+        )
+        .then(folders => {
+            res.json(folders.map(sanitizeFolder))
         })
         .catch(next)
     })
 
     .post(jsonParser, (req, res, next) => {
-        const { name : newFolderName } = req.body
-        FolderService.insertFolder(
-            req.app.get( 'db' ),
-            newFolderName
-        )
-        .then(( folder ) => {
-            res
-            .status( 201 )
-            .location( path.posix.join( req.originalUrl, `/${folder.id}` ) )
-            .json( folder )
-        })
-        .catch(next)
-    })
+        const { name } = req.body
+        const newFolder = {name}
 
-    folderRouter
-
-    .route( 'api/folder/:folderId' )
-
-    .all( (req, res, next) => {
-        FolderService.getFolderById(
-            req.app.get('db'),
-            req.params.folderId
-        )
-        .then( (folder) => {
-            if (!folder) {
-            logger.error(`Folder with id ${req.params.folderId} not found`)
-                return res.status( 404 ).json( {
-                    error : { message : 'Folder not found.' }
+        if(!name) {
+                return res.status(400).json({
+                    error: { message: `Missing 'name' in request body`}
                 })
-            }
-            res.folder = folder // save folder for next middlewear, and pass on to next
-            next()
-        })
-        .catch(next)
+        }
+
+        FoldersService.insertFolder(req.app.get('db'), newFolder)
+            .then(folder => {
+                res
+                    .status(201)
+                    .location(path.posix.join(req.originalUrl, `/${folder.id}`))
+                    .json(sanitizeFolder(folder))
+            })
+            .catch(next)
     })
 
-    .get(( req, res, next ) => {
+foldersRouter
+    .route('/:id')
 
-        FolderService.getNotesForFolder(
-            req.app.get('db'), 
-            res.folder.id
-        )
-        .then((notes) => {
-            if (!notes) {
-                return res.status( 404 ).json( {
-                    error : { message : 'Cannot find any notes for that folder' }
-                })
-            }
-            const folder = res.folder
-            res.json({ folder, notes })
-            next()
-        })
+    .all((req, res, next) => {
+        FoldersService.getById(req.app.get('db'), req.params.id)
+            .then(folder => {
+                if (!folder) {
+                    return res.status(404).json({
+                        error: { message: 'Folder Not Found'}
+                    })
+                }
+                res.folder = folder
+                next()
+            })
     })
-    
-        //NOT CURRENTLY ENABLING PATCH
-        //   .patch( jsonParser, ( req, res, next ) => {
-        //     const { name : newFolderName } = req.body
-        
-        //     FolderService.updateFolderName(
-        //       req.app.get( 'db' ),
-        //       req.params.folderId,
-        //       newFolderName
-        //     )
-        //       .then( ( updatedFolder ) => {
-        //         res
-        //           .status( 200 )
-        //           .json( updatedFolder )
 
-        //       } )
-        //       .catch( next )
-        //   } )
-            
-    .delete(( req, res, next) => {
-        FolderService.deleteFolder(
-            req.app.get( 'db' ),
-            req.params.folderId
-        )
-        .then((numRowsAffected) => {
-            res
-                .status( 204 )
-                .end()
-        })
-        .catch(next)
+    .get((req, res, next) => {
+        res.json(sanitizeFolder(res.folder))
     })
-    
-module.exports = folderRouter
+
+    .delete((req, res, next) => {
+        FoldersService.deleteFolder(req.app.get('db'), req.params.id)
+            .then(() => {
+                res.status(204).end()
+            })
+            .catch(next)
+    })
+
+    //NO CURRENT PATCH FUNCTIONALITY ON CLIENT SIDE
+    // .patch(jsonParser, (req, res, next) => {
+    //     const { name} = req.body
+    //     const folderUpdate = {name}
+
+    //     if(!name) {
+    //         return res.status(400).json({
+    //             error: { message: 'Request must contain folder name'}
+    //         })
+    //     }
+    //     FoldersService.updateFolder(req.app.get('db'), req.params.id, folderUpdate)
+    //         .then(() => {
+    //             res.status(204).end()
+    //         })
+    //         .catch(next)
+    // })
+
+module.exports = foldersRouter

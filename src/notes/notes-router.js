@@ -10,12 +10,13 @@ const sanitizeNote = note => ({
     id: note.id,
     name: xss(note.name),
     modified: note.modified,
-    folder_id: note.folder_id,
+    folderid: note.folderid,
     content: xss(note.content)
 })
 
 notesRouter
-    .route('api/notes')
+    .route('/')
+
     .get((req, res, next) => {
         NotesService.getAllNotes(
             req.app.get('db')
@@ -25,14 +26,15 @@ notesRouter
         })
         .catch(next)
     })
+
     .post(jsonParser, (req, res, next) => {
-        const { name, folder_id, content } = req.body
-        const newNote = { name, folder_id, content}
+        const { name, folderid, content } = req.body
+        const newNote = { name, folderid, content}
 
         for (const [key, value] of Object.entries(newNote)) {
             if (value == null) {
                 return res.status(400).json({
-                    error: { message: `Missing ${key} in request`}
+                    error: { message: `Missing '${key}' in request body`}
                 })
             }
         }
@@ -48,7 +50,8 @@ notesRouter
     })
 
 notesRouter
-    .route('api/notes/:id')
+    .route('/:id')
+
     .all((req, res, next) => {
         NotesService.getById(req.app.get('db'), req.params.id)
             .then(note => {
@@ -61,9 +64,11 @@ notesRouter
                 next()
             })
     })
+
     .get((req, res, next) => {
         res.json(sanitizeNote(res.note))
     })
+
     .delete((req, res, next) => {
         NotesService.deleteNote(req.app.get('db'), req.params.id)
             .then(() => {
@@ -74,13 +79,13 @@ notesRouter
 
     //NO UPDATE FUNCTIONALITY ON CLIENT SIDE YET
     // .patch(jsonParser, (req, res, next) => {
-    //     const { name, folder_id, content } = req.body
-    //     const noteUpdate = {name, folder_id, content}
+    //     const { name, folderid, content } = req.body
+    //     const noteUpdate = {name, folderid, content}
 
     //     const numValues = Object.values(articleToUpdate).filter(Boolean).length
     //     if (numValues === 0) {
     //         return res.status(400).json({
-    //             error: { message: 'Request must contain either name, folder_id, or content'}
+    //             error: { message: 'Request must contain either name, folderid, or content'}
     //         })
     //     }
     //     NotesService.updateNote(req.app.get('db'), req.params.id, noteUpdate)

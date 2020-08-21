@@ -1,10 +1,10 @@
-const NotesService = {
+const FoldersService = {
     getAllFolders(knex) {
-        return knex.select('*').from('noteful_folders')
+        return knex('noteful_folders').select('*')
     },
 
-    insertNote( knex, newFolder) {
-        return knex 
+    insertFolder(knex, newFolder) {
+        return knex
             .insert(newFolder)
             .into('noteful_folders')
             .returning('*')
@@ -13,22 +13,25 @@ const NotesService = {
             })
     },
 
-    getById(knex, id) {
-        return knex.from('noteful_folders').select('*').where('id', id).first()
-    },
-
-    deleteNote(knex, id) {
+    getById(knex, ID) {
         return knex('noteful_folders')
-            .where({ id })
+            .select('*')
+            .where('id', ID)
+            .first()
+    },
+    
+    deleteFolder(knex, ID) {
+        return knex('noteful_folders')
+            .where('id', ID)
             .delete()
     },
 
-    //NO current option to edit on client side???
-    // updateNote(knex, id, newNoteFields) {
-    //     return knex('noteful_notes')
-    //         .where({ id })
-    //         .update(newNoteFields)
-    // },
+   // NO CURRENT PATCH FUNCTIONALITY ON CLIENT SIDE
+    // updateFolder(knex, ID, newData) {
+    //     return knex('noteful_folderss')
+    //         .where('id', ID)
+    //         .update(newData)
+    // }
 }
 
-module.exports = NotesService
+module.exports = FoldersService

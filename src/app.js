@@ -21,12 +21,12 @@ app.use(cors())
 app.use(validateBearerToken)
 
 app.get('/', (req, res) => {
-    res.send('Hello, world!')
+    res.send('Testing out the Noteful server!')
 })
 
 
-app.use( '/', folderRouter )
-app.use( '/', noteRouter )
+app.use( '/api/folders', folderRouter )
+app.use( '/api/notes', noteRouter )
 
 
 app.use(errorHandler)
