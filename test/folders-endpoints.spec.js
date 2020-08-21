@@ -1,6 +1,6 @@
 const knex = require('knex')
 const app = require('../src/app');
-const { makeFoldersArray, makeMaliciousFolder } = require('./folders.fixtures')
+const { makeFoldersArray, makeMaliciousFolder } = require('./folders-fixtures')
 
 describe('Folder Endpoints', function() {
   let db;
@@ -28,6 +28,7 @@ describe('Folder Endpoints', function() {
       it(`responds with 200 and an empty list`, () => {
         return supertest(app)
           .get('/api/folders')
+          .set('Authorization', `Bearer ${process.env.API_TOKEN}`)
           .expect(200, [])
       })
     })
@@ -44,6 +45,7 @@ describe('Folder Endpoints', function() {
       it('responds with 200 and all of the folders', () => {
         return supertest(app)
           .get('/api/folders')
+          .set('Authorization', `Bearer ${process.env.API_TOKEN}`)
           .expect (200, testFolder)
       })
     })
@@ -60,6 +62,7 @@ describe('Folder Endpoints', function() {
       it('removes XSS attack folder name', () => {
         return supertest(app)
           .get(`/api/folders`)
+          .set('Authorization', `Bearer ${process.env.API_TOKEN}`)
           .expect(200)
           .expect(res => {
             expect(res.body[0].title).to.eql(expectedFolder.title)
@@ -74,6 +77,7 @@ describe('Folder Endpoints', function() {
         const folder_id = 123456
         return supertest(app)
           .get(`/api/folders/${folder_id}`)
+          .set('Authorization', `Bearer ${process.env.API_TOKEN}`)
           .expect(404, { error: { message: `Folder Not Found` } })
       })
     })
@@ -92,6 +96,7 @@ describe('Folder Endpoints', function() {
         const expectedFolder = testFolders[folder_id - 1]
         return supertest(app)
           .get(`/api/folders/${folder_id}`)
+          .set('Authorization', `Bearer ${process.env.API_TOKEN}`)
           .expect(200, expectedFolder)
       })
     })
@@ -109,6 +114,7 @@ describe('Folder Endpoints', function() {
         console.log('maliciousfolder ', maliciousFolder.id)
         return supertest(app)
           .get(`/api/folders/${maliciousFolder.id}`)
+          .set('Authorization', `Bearer ${process.env.API_TOKEN}`)
           .expect(200)
           .expect(res => {
             expect(res.body.title).to.eql(expectedFolder.title)
@@ -128,6 +134,7 @@ describe('Folder Endpoints', function() {
     return supertest(app)
       .post('/api/folders')
       .send(newFolder)
+      .set('Authorization', `Bearer ${process.env.API_TOKEN}`)
       .expect(201)
       .expect(res => {
         expect(res.body.title).to.eql(newFolder.title)
@@ -154,6 +161,7 @@ describe('Folder Endpoints', function() {
         return supertest(app)
           .post('/api/folders')
           .send(newFolder)
+          .set('Authorization', `Bearer ${process.env.API_TOKEN}`)
           .expect(400, {
             error: { message: `Missing '${field}' in request body` }
           })
@@ -165,6 +173,7 @@ describe('Folder Endpoints', function() {
       return supertest(app)
         .post(`/api/folders`)
         .send(maliciousFolder)
+        .set('Authorization', `Bearer ${process.env.API_TOKEN}`)
         .expect(201)
         .expect(res => {
           expect(res.body.title).to.eql(expectedFolder.title);
@@ -196,6 +205,7 @@ describe('Folder Endpoints', function() {
         const expectedFolder = testFolder.filter(folder => folder.id !== idToRemove)
         return supertest(app)
           .delete(`/api/folders/${idToRemove}`)
+          .set('Authorization', `Bearer ${process.env.API_TOKEN}`)
           .expect(204)
           .then(res =>
             supertest(app)
@@ -207,81 +217,82 @@ describe('Folder Endpoints', function() {
     })
   })
 
-  describe.only(`PATCH /api/folders/:folder_id`, () => {
-    context(`Given no folders`, () => {
-      it(`responds with 404`, () => {
-        const FolderId = 123456
-        return supertest(app)
-          .delete(`/api/folders/${FolderId}`)
-          .expect(404, { error: { message: `Folder Not Found` } })
-      })
-    })
 
-    context('Given there are folders in the database', () => {
-      const testFolders = makeFoldersArray()
+  //NO CURRENT PATCH/UPDATE FUNCTIONALITY ON CLIENT SIDE
+  // describe.only(`PATCH /api/folders/:folder_id`, () => {
+  //   context(`Given no folders`, () => {
+  //     it(`responds with 404`, () => {
+  //       const FolderId = 123456
+  //       return supertest(app)
+  //         .delete(`/api/folders/${FolderId}`)
+  //         .expect(404, { error: { message: `Folder Not Found` } })
+  //     })
+  //   })
 
-      beforeEach('insert folders', () => {
-        return db
-          .into('noteful_folders')
-          .insert(testFolders)
-      })
+  //   context('Given there are folders in the database', () => {
+  //     const testFolders = makeFoldersArray()
 
-      it('responds with 204 and updates the folder', () => {
-        const idToUpdate = 2
-        const updateFolder = {
-          title: 'updated folder title',
-        }
-        const expectedFolder = {
-          ...testFolders[idToUpdate - 1],
-          ...updateFolder
-        }
-        return supertest(app)
-          .patch(`/api/folders/${idToUpdate}`)
-          .send(updateFolder)
-          .expect(204)
-          .then(res =>
-            supertest(app)
-              .get(`/api/folders/${idToUpdate}`)
-              .expect(expectedFolder)
-          )
-      })
+  //     beforeEach('insert folders', () => {
+  //       return db
+  //         .into('noteful_folders')
+  //         .insert(testFolders)
+  //     })
 
-      it(`responds with 400 when no required fields supplied`, () => {
-        const idToUpdate = 2
-        return supertest(app)
-          .patch(`/api/folders/${idToUpdate}`)
-          .send({ irrelevantField: 'foo' })
-          .expect(400, {
-            error: {
-              message: `Request body must contain either, 'title'`
-            }
-          })
-      })
+  //     it('responds with 204 and updates the folder', () => {
+  //       const idToUpdate = 2
+  //       const updateFolder = {
+  //         title: 'updated folder title',
+  //       }
+  //       const expectedFolder = {
+  //         ...testFolders[idToUpdate - 1],
+  //         ...updateFolder
+  //       }
+  //       return supertest(app)
+  //         .patch(`/api/folders/${idToUpdate}`)
+  //         .set('Authorization', `Bearer ${process.env.API_TOKEN}`)
+  //         .send(updateFolder)
+  //         .expect(204)
+  //         .then(res =>
+  //           supertest(app)
+  //             .get(`/api/folders/${idToUpdate}`)
+  //             .expect(expectedFolder)
+  //         )
+  //     })
 
-      it(`responds with 204 when updating only a subset of fields`, () => {
-        const idToUpdate = 2
-        const updateFolder = {
-          title: 'updated folder title',
-        }
-        const expectedFolder = {
-          ...testFolders[idToUpdate - 1],
-          ...updateFolder
-        }
+  //     it(`responds with 400 when no required fields supplied`, () => {
+  //       const idToUpdate = 2
+  //       return supertest(app)
+  //         .patch(`/api/folders/${idToUpdate}`)
+  //         .send({ irrelevantField: 'foo' })
+  //         .expect(400, {
+  //           error: {
+  //             message: `Request body must contain either, 'title'`
+  //           }
+  //         })
+  //     })
 
-        return supertest(app)
-          .patch(`/api/folders/${idToUpdate}`)
-          .send({
-            ...updateFolder,
-            fieldToIgnore: 'should not be in GET response'
-          })
-          .expect(204)
-          .then(res =>
-            supertest(app)
-              .get(`/api/folders/${idToUpdate}`)
-              .expect(expectedFolder)
-          )
-      })
-    })
-  })
+  //     it(`responds with 204 when updating only a subset of fields`, () => {
+  //       const idToUpdate = 2
+  //       const updateFolder = {
+  //         title: 'updated folder title',
+  //       }
+  //       const expectedFolder = {
+  //         ...testFolders[idToUpdate - 1],
+  //         ...updateFolder
+  //       }
 
+  //       return supertest(app)
+  //         .patch(`/api/folders/${idToUpdate}`)
+  //         .send({
+  //           ...updateFolder,
+  //           fieldToIgnore: 'should not be in GET response'
+  //         })
+  //         .expect(204)
+  //         .then(res =>
+  //           supertest(app)
+  //             .get(`/api/folders/${idToUpdate}`)
+  //             .expect(expectedFolder)
+  //         )
+  //     })
+  //   })
 })

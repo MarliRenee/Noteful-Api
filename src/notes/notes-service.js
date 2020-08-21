@@ -1,22 +1,32 @@
 const NotesService = {
-    list(knex) {
-      return knex('notes').select('*');
+    getAllNotes(knex) {
+        return knex('notes').select('*')
     },
-  
-    findById(knex, id) {
-      return knex('notes').where({id}).first('*');
+    insertNote(knex, newNote) {
+        return knex
+            .insert(newNote)
+            .into('notes')
+            .returning('*')
+            .then(rows => {
+                return rows[0]
+            })
     },
-  
-    insert(knex, note) {
-      return knex('notes')
-        .insert(note)
-        .returning('*')
-        .then(rows => rows[0]);
+    getById(knex, ID) {
+        return knex('notes')
+            .select('*')
+            .where('id', ID)
+            .first()
     },
-  
-    delete(knex, id) {
-      return knex('notes').where({id}).delete();
+    deleteNote(knex, ID) {
+        return knex('notes')
+            .where('id', ID)
+            .delete()
+    },
+    updateNote(knex, ID, newData) {
+        return knex('notes')
+            .where('id', ID)
+            .update(newData)
     }
-};
-  
-module.exports = NotesService;
+}
+
+module.exports = NotesService

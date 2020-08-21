@@ -9,7 +9,7 @@ const jsonParser = express.json()
 // pull each piece of logic out of each route, all after .get, and put that all into a route file with a function for each route.
 folderRouter
 
-    .route('/folder')
+    .route('api/folder')
 
     .get(( req, res, next ) => {
         const knexInstance = req.app.get('db')
@@ -37,7 +37,7 @@ folderRouter
 
     folderRouter
 
-    .route( '/folder/:folderId' )
+    .route( 'api/folder/:folderId' )
 
     .all( (req, res, next) => {
         FolderService.getFolderById(
