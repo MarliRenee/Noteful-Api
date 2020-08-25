@@ -9,7 +9,7 @@ describe.only('Notes Endpoints', function() {
     before('make knex instance', () => {
         db = knex({
           client: 'pg',
-          connection: process.env.TEST_DB_URL,
+          connection: process.env.TEST_DATABASE_URL,
         })
         app.set('db', db)
     })
@@ -254,54 +254,54 @@ describe.only('Notes Endpoints', function() {
     })
 
     //NO CLIENT SIDE PATCH/UPDATE FUNCTIONALITY -- IN PROGRESS
-    // describe('PATCH /api/notes/:noteId', () => {
-    //     context(`Given not notes`, () => {
-    //         it(`responds with 404`, () => {
-    //             const noteId = 123456
-    //             return supertest(app)
-    //             .delete(`/api/notes/${noteId}`)
-    //             .expect(404, { error: { message: `Note does not exist`} })
-    //         })
-    //     })
+    describe('PATCH /api/notes/:noteId', () => {
+        context(`Given not notes`, () => {
+            it(`responds with 404`, () => {
+                const noteId = 123456
+                return supertest(app)
+                .delete(`/api/notes/${noteId}`)
+                .expect(404, { error: { message: `Note does not exist`} })
+            })
+        })
 
-    //     context(`Given there are articles in the database`, () => {
-    //         const testNotes = makeNotesArray()
-    //         const testFolders = makeFoldersArray()
+        context(`Given there are articles in the database`, () => {
+            const testNotes = makeNotesArray()
+            const testFolders = makeFoldersArray()
 
-    //         beforeEach('insert notes', () => {
-    //             return db
-    //             .into('noteful_folders')
-    //             .insert(testFolders)
-    //             .then(() => {
-    //                 return db
-    //                 .into('noteful_notes')
-    //                 .insert(testNotes)
-    //             })
-    //         })
+            beforeEach('insert notes', () => {
+                return db
+                .into('noteful_folders')
+                .insert(testFolders)
+                .then(() => {
+                    return db
+                    .into('noteful_notes')
+                    .insert(testNotes)
+                })
+            })
 
-    //         it(`responds with 204 and updates the note`, () => {
-    //             const idToUpdate = 2
-    //             const updateNote = {
-    //                 name: 'updated note name',
-    //                 folderid: 1,
-    //                 content: 'updated content'
-    //             }
-    //             const expectedNote = {
-    //                 ...testNotes[idToUpdate - 1],
-    //                 ...updateNote
-    //             }
-    //             return supertest(app)
-    //             .patch(`/api/notes/${idToUpdate}`)
-    //             .send(updateNote)
-    //             .expect(204)
-    //             .then(res => 
-    //                 supertest(app)
-    //                 .get(`/api/notes/${idToUpdate}`)
-    //                 .expect(expectedNote)
-    //             )
-    //         })
-    //     })
+            it(`responds with 204 and updates the note`, () => {
+                const idToUpdate = 2
+                const updateNote = {
+                    name: 'updated note name',
+                    folderid: 1,
+                    content: 'updated content'
+                }
+                const expectedNote = {
+                    ...testNotes[idToUpdate - 1],
+                    ...updateNote
+                }
+                return supertest(app)
+                .patch(`/api/notes/${idToUpdate}`)
+                .send(updateNote)
+                .expect(204)
+                .then(res => 
+                    supertest(app)
+                    .get(`/api/notes/${idToUpdate}`)
+                    .expect(expectedNote)
+                )
+            })
+        })
 
-    // })
+    })
 
 })

@@ -27,11 +27,11 @@ const FoldersService = {
     },
 
    // NO CURRENT PATCH FUNCTIONALITY ON CLIENT SIDE
-    // updateFolder(knex, ID, newData) {
-    //     return knex('noteful_folderss')
-    //         .where('id', ID)
-    //         .update(newData)
-    // }
+    updateFolder(knex, ID, newData) {
+        return knex('noteful_folderss')
+            .where('id', ID)
+            .update(newData)
+    }
 }
 
 module.exports = FoldersService

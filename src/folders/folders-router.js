@@ -73,20 +73,20 @@ foldersRouter
     })
 
     //NO CURRENT PATCH FUNCTIONALITY ON CLIENT SIDE
-    // .patch(jsonParser, (req, res, next) => {
-    //     const { name} = req.body
-    //     const folderUpdate = {name}
+    .patch(jsonParser, (req, res, next) => {
+        const { name} = req.body
+        const folderUpdate = {name}
 
-    //     if(!name) {
-    //         return res.status(400).json({
-    //             error: { message: 'Request must contain folder name'}
-    //         })
-    //     }
-    //     FoldersService.updateFolder(req.app.get('db'), req.params.id, folderUpdate)
-    //         .then(() => {
-    //             res.status(204).end()
-    //         })
-    //         .catch(next)
-    // })
+        if(!name) {
+            return res.status(400).json({
+                error: { message: 'Request must contain folder name'}
+            })
+        }
+        FoldersService.updateFolder(req.app.get('db'), req.params.id, folderUpdate)
+            .then(() => {
+                res.status(204).end()
+            })
+            .catch(next)
+    })
 
 module.exports = foldersRouter
