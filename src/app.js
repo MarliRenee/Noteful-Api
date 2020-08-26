@@ -18,7 +18,10 @@ const morganOption = (NODE_ENV === 'production')
 app.use(morgan(morganOption))
 app.use(helmet())
 app.use(cors())
-app.use(validateBearerToken)
+
+app.use(validateBearerToken)  
+
+console.log(process.env.API_TOKEN)
 
 app.get('/', (req, res) => {
     res.send('Testing out the Noteful server!')
