@@ -4,7 +4,7 @@ const morgan = require('morgan')
 const cors = require('cors')
 const helmet = require('helmet')
 const { NODE_ENV } = require('./config')
-const validateBearerToken = require('./validate-bearer-token')
+//const validateBearerToken = require('./validate-bearer-token')
 const errorHandler = require('./error-handler')
 const folderRouter = require( './folders/folders-router' )
 const noteRouter = require( './notes/notes-router' )
@@ -19,9 +19,9 @@ app.use(morgan(morganOption))
 app.use(helmet())
 app.use(cors())
 
-app.use(validateBearerToken)  
+//app.use(validateBearerToken)  
 
-console.log(process.env.API_TOKEN)
+//console.log(process.env.API_TOKEN)
 
 app.get('/', (req, res) => {
     res.send('Testing out the Noteful server!')

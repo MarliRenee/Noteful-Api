@@ -28,7 +28,7 @@ describe('Folder Endpoints', function() {
       it(`responds with 200 and an empty list`, () => {
         return supertest(app)
           .get('/api/folders')
-          .set('Authorization', `Bearer ${process.env.API_TOKEN}`)
+          // //.set('Authorization', `Bearer ${process.env.API_TOKEN}`)
           .expect(200, [])
       })
     })
@@ -45,7 +45,7 @@ describe('Folder Endpoints', function() {
       it('responds with 200 and all of the folders', () => {
         return supertest(app)
           .get('/api/folders')
-          .set('Authorization', `Bearer ${process.env.API_TOKEN}`)
+          //.set('Authorization', `Bearer ${process.env.API_TOKEN}`)
           .expect (200, testFolder)
       })
     })
@@ -62,7 +62,7 @@ describe('Folder Endpoints', function() {
       it('removes XSS attack folder name', () => {
         return supertest(app)
           .get(`/api/folders`)
-          .set('Authorization', `Bearer ${process.env.API_TOKEN}`)
+          //.set('Authorization', `Bearer ${process.env.API_TOKEN}`)
           .expect(200)
           .expect(res => {
             expect(res.body[0].name).to.eql(expectedFolder.name)
@@ -77,7 +77,7 @@ describe('Folder Endpoints', function() {
         const folder_id = 123456
         return supertest(app)
           .get(`/api/folders/${folder_id}`)
-          .set('Authorization', `Bearer ${process.env.API_TOKEN}`)
+          //.set('Authorization', `Bearer ${process.env.API_TOKEN}`)
           .expect(404, { error: { message: `Folder Not Found` } })
       })
     })
@@ -96,7 +96,7 @@ describe('Folder Endpoints', function() {
         const expectedFolder = testFolders[folder_id - 1]
         return supertest(app)
           .get(`/api/folders/${folder_id}`)
-          .set('Authorization', `Bearer ${process.env.API_TOKEN}`)
+          //.set('Authorization', `Bearer ${process.env.API_TOKEN}`)
           .expect(200, expectedFolder)
       })
     })
@@ -114,7 +114,7 @@ describe('Folder Endpoints', function() {
         console.log('maliciousfolder ', maliciousFolder.id)
         return supertest(app)
           .get(`/api/folders/${maliciousFolder.id}`)
-          .set('Authorization', `Bearer ${process.env.API_TOKEN}`)
+          //.set('Authorization', `Bearer ${process.env.API_TOKEN}`)
           .expect(200)
           .expect(res => {
             expect(res.body.name).to.eql(expectedFolder.name)
@@ -134,7 +134,7 @@ describe('Folder Endpoints', function() {
     return supertest(app)
       .post('/api/folders')
       .send(newFolder)
-      .set('Authorization', `Bearer ${process.env.API_TOKEN}`)
+      //.set('Authorization', `Bearer ${process.env.API_TOKEN}`)
       .expect(201)
       .expect(res => {
         expect(res.body.name).to.eql(newFolder.name)
@@ -144,7 +144,7 @@ describe('Folder Endpoints', function() {
       .then(res =>
         supertest(app)
           .get(`/api/folders/${res.body.id}`)
-          .set('Authorization', `Bearer ${process.env.API_TOKEN}`)
+          //.set('Authorization', `Bearer ${process.env.API_TOKEN}`)
           .expect(res.body)
         )
     })
@@ -162,7 +162,7 @@ describe('Folder Endpoints', function() {
         return supertest(app)
           .post('/api/folders')
           .send(newFolder)
-          .set('Authorization', `Bearer ${process.env.API_TOKEN}`)
+          //.set('Authorization', `Bearer ${process.env.API_TOKEN}`)
           .expect(400, {
             error: { message: `Missing '${field}' in request body` }
           })
@@ -174,7 +174,7 @@ describe('Folder Endpoints', function() {
       return supertest(app)
         .post(`/api/folders`)
         .send(maliciousFolder)
-        .set('Authorization', `Bearer ${process.env.API_TOKEN}`)
+        //.set('Authorization', `Bearer ${process.env.API_TOKEN}`)
         .expect(201)
         .expect(res => {
           expect(res.body.name).to.eql(expectedFolder.name);
@@ -188,7 +188,7 @@ describe('Folder Endpoints', function() {
         const folder_id = 123456;
         return supertest(app)
           .delete(`/api/folders/${folder_id}`)
-          .set('Authorization', `Bearer ${process.env.API_TOKEN}`)
+          //.set('Authorization', `Bearer ${process.env.API_TOKEN}`)
           .expect(404, { error: { message: `Folder Not Found` } })
       })
     })
@@ -207,7 +207,7 @@ describe('Folder Endpoints', function() {
         const expectedFolder = testFolder.filter(folder => folder.id !== idToRemove)
         return supertest(app)
           .delete(`/api/folders/${idToRemove}`)
-          .set('Authorization', `Bearer ${process.env.API_TOKEN}`)
+          //.set('Authorization', `Bearer ${process.env.API_TOKEN}`)
           .expect(204)
           .then(res =>
             supertest(app)
@@ -251,7 +251,7 @@ describe('Folder Endpoints', function() {
   //       }
   //       return supertest(app)
   //         .patch(`/api/folders/${idToUpdate}`)
-  //         .set('Authorization', `Bearer ${process.env.API_TOKEN}`)
+  //         //.set('Authorization', `Bearer ${process.env.API_TOKEN}`)
   //         .send(updateFolder)
   //         .expect(204)
   //         .then(res =>
